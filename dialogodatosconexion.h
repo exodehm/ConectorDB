@@ -2,6 +2,7 @@
 #define DIALOGODATOSCONEXION_H
 
 #include <QDialog>
+#include <QtSql/QSqlDatabase>
 
 class DialogoConfiguracion;
 
@@ -14,7 +15,7 @@ class DialogoDatosConexion : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogoDatosConexion(QWidget *parent = nullptr);
+    explicit DialogoDatosConexion(QSqlDatabase& db, QWidget *parent = nullptr);
     ~DialogoDatosConexion();
     void readSettings();
 
@@ -25,11 +26,14 @@ public slots:
     QStringList LeeDatosConexion();
     void ConfiguracionAvanzada();
     bool IsPostgresRunning();
+    bool Conectar();
 
 private:
     Ui::DialogoDatosConexion *ui;
-    DialogoConfiguracion* m_d;
+    DialogoConfiguracion* m_dialogoconfig;
     QString m_postgres;
+    QSqlDatabase m_db;
+    QString m_directorio_datos_conexion;
 };
 
 #endif // DIALOGODATOSCONEXION_H

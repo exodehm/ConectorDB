@@ -1,9 +1,10 @@
 #include "conector.h"
-#include "ui_widget.h"
+//#include "ui_widget.h"
+#include "ui_conector.h"
 #include "./dialogodatosconexion.h"
 #include <QDebug>
 
-Widget::Widget(QWidget *parent):QWidget(parent),ui(new Ui::Widget)
+Conector::Conector(QWidget *parent):QWidget(parent),ui(new Ui::Conector)
 {
     ui->setupUi(this);
     readSettings();
@@ -15,14 +16,14 @@ Widget::Widget(QWidget *parent):QWidget(parent),ui(new Ui::Widget)
     QObject::connect(ui->botonConfigurar, SIGNAL(clicked()), this,  SLOT(Configurar()));
 }
 
-Widget::~Widget()
+Conector::~Conector()
 {
     QSqlDatabase::removeDatabase("QPSQL");
     writeSettings();
     delete ui;
 }
 
-void Widget::readSettings()
+void Conector::readSettings()
 {
     QSettings settings("DavidSoft", "SDMed2");
     settings.beginGroup("DatosConexion");
@@ -34,7 +35,7 @@ void Widget::readSettings()
     settings.endGroup();
 }
 
-void Widget::writeSettings()
+void Conector::writeSettings()
 {
     QSettings settings("DavidSoft", "SDMed2");
 
@@ -47,7 +48,7 @@ void Widget::writeSettings()
     settings.endGroup();
 }
 
-void Widget::ConfigurarYConectar()
+void Conector::ConfigurarYConectar()
 {
     qDebug()<<"Nombre base de datos: "<<m_basededatos;
     qDebug()<<"Nombre usuario: "<<m_nombre;
@@ -74,11 +75,11 @@ void Widget::ConfigurarYConectar()
     }
 }
 
-void Widget::Configurar()
+void Conector::Configurar()
 {
     if (m_d==nullptr)
     {
-        m_d = new DialogoDatosConexion(this);
+        m_d = new DialogoDatosConexion(m_db, this);
     }
     m_d->show();
     if (m_d->exec())

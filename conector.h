@@ -1,24 +1,24 @@
-#ifndef WIDGET_H
-#define WIDGET_H
+#ifndef CONECTOR_H
+#define CONECTOR_H
 
 #include <QWidget>
 #include <QSettings>
 #include <QtSql/QSqlDatabase>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class Widget; }
+namespace Ui { class Conector; }
 QT_END_NAMESPACE
 
 class DialogoDatosConexion;
 
-class Widget : public QWidget
+class Conector : public QWidget
 {
     Q_OBJECT
 
 public:
 
-    Widget(QWidget *parent = nullptr);
-    ~Widget();
+    Conector(QWidget *parent = nullptr);
+    ~Conector();
 
     void readSettings();
     void writeSettings();
@@ -31,7 +31,7 @@ public slots:
     void ConfigurarYConectar();
 
 private:
-    Ui::Widget *ui;
+    Ui::Conector *ui;
     QString m_nombre;
     QString m_host;
     QString m_puerto;
@@ -41,4 +41,4 @@ private:
     DialogoDatosConexion *m_d;
     quint8 m_tiempoMaximoIntentoConexion;
 };
-#endif // WIDGET_H
+#endif // CONECTOR_H

@@ -21,7 +21,7 @@ public:
     void ReadSettings();
     void WriteSettings();
     bool HayPython();
-    bool IsPostgresRunning();
+    //bool IsPostgresRunning();
     void ComprobacionesPython();
     void ComprobarDatosAdminRole(QSqlDatabase db);
     void ComprobarRoleSdmed(QSqlQuery consulta);

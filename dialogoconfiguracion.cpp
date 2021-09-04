@@ -210,7 +210,7 @@ void DialogoConfiguracion::DatosAdmin()
     {
         m_dialogoConfiguracionAdmin = new DialogoCredencialesConexionAdmin(m_dbAdmin, this);
     }
-    //QObject::connect(d,SIGNAL(accepted()),this,SLOT(ComprobacionesPostgres()));
+    QObject::connect(m_dialogoConfiguracionAdmin,SIGNAL(accepted()),this,SLOT(ComprobacionesPostgres()));
     m_dialogoConfiguracionAdmin->show();
     ComprobarDatosAdminRole(m_dbAdmin);
 }
@@ -280,6 +280,11 @@ void DialogoConfiguracion::WriteSettings()
     QSettings settings;
     settings.beginGroup("rutas");
     settings.setValue("ruta_python", m_rutaPython);
+    //si hay ruta de datos la guardo para poder usarla luego para intentar levantar y parar el servidor
+    if (!ui->label_ruta_directorio_datos->text().isEmpty())
+    {
+        settings.setValue("ruta_directorio_datos",ui->label_ruta_directorio_datos->text());
+    }
     settings.endGroup();
 }
 
@@ -321,7 +326,7 @@ bool DialogoConfiguracion::HayPython()
     return false;
 }
 
-bool DialogoConfiguracion::IsPostgresRunning()
+/*bool DialogoConfiguracion::IsPostgresRunning()
 {
     QSettings settings;
     QString admin = settings.value("adminrole/usuario").toString();
@@ -355,11 +360,11 @@ bool DialogoConfiguracion::IsPostgresRunning()
         return true;
     }
     #endif
-}
+}*/
 
 void DialogoConfiguracion::ComprobacionesPostgres()
 {
-    if (IsPostgresRunning())
+    //if (IsPostgresRunning())
     {
         if (m_dbAdmin.open())
         {
@@ -371,6 +376,13 @@ void DialogoConfiguracion::ComprobacionesPostgres()
             {
                 qDebug()<<consulta.value(0).toString();
                 ui->label_ruta_directorio_extension->setText(tr("<font color=green><b>%1</b></font>").arg(consulta.value(0).toString()+"/extension"));
+            }
+            QString consultaDirectorioDatos = "SHOW data_directory;";
+            consulta.exec(consultaDirectorioDatos);
+            while (consulta.next())
+            {
+                qDebug()<<consulta.value(0).toString();
+                ui->label_ruta_directorio_datos->setText(tr("<font color=green><b>%1</b></font>").arg(consulta.value(0).toString()));
             }
             //extensiones instaladas
             ComprobarRoleSdmed(consulta);
@@ -415,7 +427,7 @@ void DialogoConfiguracion::ComprobarDatosAdminRole(QSqlDatabase db)
     db.setUserName(admin);
     db.setPassword(password);
     db.setDatabaseName("sdmed");
-    //bool esAdmin = false;
+    //bool esAdmin = true;
     if (db.open())
     {
         QSqlQuery consulta(db);

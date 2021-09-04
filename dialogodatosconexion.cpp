@@ -8,22 +8,24 @@
 #include <QPushButton>
 #include <QProcess>
 
-DialogoDatosConexion::DialogoDatosConexion(QWidget *parent) :
+DialogoDatosConexion::DialogoDatosConexion(QSqlDatabase &db, QWidget *parent) :
+    m_db(db),
     QDialog(parent),
     ui(new Ui::DialogoDatosConexion)
 {
     ui->setupUi(this);
-    m_d =  nullptr;
+    m_dialogoconfig =  nullptr;
     readSettings();
     SincronizarCheckButtons();
     QObject::connect(ui->radioButtonLocalHost,SIGNAL(toggled(bool)),this,SLOT(SincronizarCheckButtons()));
     QObject::connect(ui->botonConfiguracionAvanzada, &QPushButton::clicked, [=] () {ConfiguracionAvanzada();});
+    QObject::connect(ui->botonComprobar,&QPushButton::clicked, [=] () {Conectar();});
     //QObject::connect(ui->botonera->button(QDialogButtonBox::Ok),SIGNAL(clicked()),this,SLOT(LeeDatosConexion()));
+
 }
 
 DialogoDatosConexion::~DialogoDatosConexion()
 {
-    qDebug()<<"Adios";
     delete ui;
 }
 
@@ -36,6 +38,9 @@ void DialogoDatosConexion::readSettings()
     ui->lineEditUsuario->setText(settings.value("usuario").toString());
     ui->lineEditPuerto->setText(settings.value("puerto").toString());
     ui->lineEditPasswd->setText(settings.value("passwd").toString());
+    settings.endGroup();
+    settings.beginGroup("rutas");
+    m_directorio_datos_conexion = settings.value("ruta_directorio_datos").toString();
     settings.endGroup();
 }
 
@@ -69,11 +74,11 @@ QStringList DialogoDatosConexion::DialogoDatosConexion::LeeDatosConexion()
 
 void DialogoDatosConexion::ConfiguracionAvanzada()
 {
-    if (m_d==nullptr)
+    if (m_dialogoconfig==nullptr)
     {
-        m_d = new DialogoConfiguracion;
+        m_dialogoconfig = new DialogoConfiguracion;
     }
-    m_d->show();
+    m_dialogoconfig->show();
 }
 
 void DialogoDatosConexion::writeSettings()
@@ -135,14 +140,59 @@ bool DialogoDatosConexion::IsPostgresRunning()
         return false;
     #else //windows
     {
-        QProcess programa;
-        QStringList environment = programa.systemEnvironment();
-        QString commandToStart= "netstat";
-        QStringList argumentos;
-        argumentos<<"-a"<<"-n";
-        programa.start(commandToStart,argumentos);
-        //netstat -a -n | findstr 5432
+        /*QProcess process1;
+        QProcess process2;
+        process1.setStandardOutputProcess(&process2);
+        process1.start("netstat", QStringList()<<"-a"<<"-n");
+        process2.start("findstr", QStringList()<<"5432");
+        process2.setProcessChannelMode(QProcess::ForwardedChannels);
+        // Wait for it to start
+        if(!process1.waitForStarted())
+            return 0;
+
+        bool retval = false;
+        QByteArray buffer;
+        while (retval = process2.waitForFinished())
+        {
+            buffer.append(process2.readAll());
+        }*/
+
+        /*if (!retval) {
+            qDebug() << "Process 2 error:" << process2.errorString();
+            return 1;
+        }*/
+        /*qDebug() << "Buffer data" << buffer<<" tam "<<buffer.isEmpty();
+        return !buffer.isEmpty();*/
         return true;
     }
-    #endif
+#endif
+}
+
+bool DialogoDatosConexion::Conectar()
+{
+    m_db.setDatabaseName(ui->lineEditBBDD->text());
+    m_db.setUserName(ui->lineEditUsuario->text());
+    m_db.setPort(ui->lineEditPuerto->text().toInt());
+    m_db.setPassword(ui->lineEditPasswd->text());
+    //IP o localhost
+    if (ui->radioButtonLocalHost->isChecked())
+    {
+        m_db.setHostName("localhost");
+    }
+    else if (ui->radioButtonIP->isChecked())
+    {
+
+    }
+    if (m_db.open())
+    {
+        ui->labelConectado->setStyleSheet("QLabel { color: green;}");
+        ui->labelConectado->setText("<b>Exito</b>");
+    }
+    else
+    {
+        ui->labelConectado->setStyleSheet("QLabel {color: red;}");
+        ui->labelConectado->setText("<b>Fracaso</b>");
+    }
+    return m_db.open();
+
 }
