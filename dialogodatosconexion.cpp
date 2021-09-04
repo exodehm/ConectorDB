@@ -126,7 +126,7 @@ bool DialogoDatosConexion::IsPostgresRunning()
         qDebug()<<"exit status"<<exitCode;
         m_postgres = QString::fromLocal8Bit(programa.readAllStandardOutput());
         QString stdError = QString::fromLocal8Bit(programa.readAllStandardError());
-        //qDebug()<<"Salida: "<<stdOutput;
+        qDebug()<<"Salida: "<<m_postgres;
         qDebug()<<"Errores: "<<stdError;
         if (exitCode == 0)
         {
