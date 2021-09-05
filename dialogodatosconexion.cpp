@@ -39,9 +39,10 @@ void DialogoDatosConexion::readSettings()
     ui->lineEditPuerto->setText(settings.value("puerto").toString());
     ui->lineEditPasswd->setText(settings.value("passwd").toString());
     settings.endGroup();
-    settings.beginGroup("rutas");
-    m_directorio_datos_conexion = settings.value("ruta_directorio_datos").toString();
-    settings.endGroup();
+    //settings.beginGroup("rutas");
+    //m_rutaPython = settings.value("rutas/ruta_python").toString();
+    m_directorio_datos_conexion = settings.value("rutas/ruta_directorio_datos").toString();
+    //settings.endGroup();
 }
 
 QStringList DialogoDatosConexion::DialogoDatosConexion::LeeDatosConexion()
@@ -104,9 +105,21 @@ void DialogoDatosConexion::SincronizarCheckButtons()
     //este solo se activara si estamos en modo local, para poder instalar
     //extensiones y demas.
     ui->botonConfiguracionAvanzada->setEnabled(ui->radioButtonLocalHost->isChecked() && IsPostgresRunning());
-    //boton arrancar postgres
-    //solo se activa si estamos en localhost y el servidor no esta arrancado
-    ui->botonArrancarServidor->setEnabled(ui->radioButtonLocalHost->isChecked() && !IsPostgresRunning());
+    //ver si hay que modificar el boton de arrancar servidor
+    ActualizarBotonServidor();
+}
+
+void DialogoDatosConexion::ActualizarBotonServidor()
+{
+    //boton arrancar/parar postgres
+    //solo se activa si estamos en localhost y tenemos la ruta donde se guardan los datos de postgres
+    qDebug()<<"Los datos estan en "<<m_directorio_datos_conexion;
+    ui->botonArrancarServidor->setEnabled(ui->radioButtonLocalHost->isChecked() && !m_directorio_datos_conexion.isEmpty()
+                                          && !m_directorio_datos_conexion.isNull());
+    if (IsPostgresRunning())
+    {
+        ui->botonArrancarServidor->setText("Parar servidor");
+    }
 }
 
 bool DialogoDatosConexion::IsPostgresRunning()
@@ -140,6 +153,34 @@ bool DialogoDatosConexion::IsPostgresRunning()
         return false;
     #else //windows
     {
+        QProcess proceso1, proceso2;
+        QStringList environment = proceso1.systemEnvironment();
+        QString commandToStart1= "netstat";
+        QStringList argumentos1;
+        argumentos1<<"-ano";
+        proceso1.start(commandToStart1,argumentos1);
+        QString commandToStart2= "findstr";
+        QStringList argumentos2;
+        argumentos2<<"\"5432\"";
+        proceso2.start(commandToStart2,argumentos2);
+        proceso2.setProcessChannelMode(QProcess::ForwardedChannels);
+        bool started = proceso1.waitForStarted();
+        qDebug()<<"bool "<<started;
+        if (!proceso1.waitForFinished(10000)) // 10 Second timeout
+        {
+            proceso1.kill();
+        }
+        int exitCode = proceso1.exitCode();
+        qDebug()<<"exit status"<<exitCode;
+        m_postgres = QString::fromLocal8Bit(proceso1.readAllStandardOutput());
+        QString stdError = QString::fromLocal8Bit(proceso1.readAllStandardError());
+        qDebug()<<"Salida: "<<m_postgres;
+        qDebug()<<"Errores: "<<stdError;
+        if (exitCode == 0)
+        {
+            return true;
+        }
+        return false;
         /*QProcess process1;
         QProcess process2;
         process1.setStandardOutputProcess(&process2);
@@ -152,7 +193,7 @@ bool DialogoDatosConexion::IsPostgresRunning()
 
         bool retval = false;
         QByteArray buffer;
-        while (retval = process2.waitForFinished())
+        while (retval == process2.waitForFinished())
         {
             buffer.append(process2.readAll());
         }*/
@@ -163,7 +204,7 @@ bool DialogoDatosConexion::IsPostgresRunning()
         }*/
         /*qDebug() << "Buffer data" << buffer<<" tam "<<buffer.isEmpty();
         return !buffer.isEmpty();*/
-        return true;
+        //return true;
     }
 #endif
 }

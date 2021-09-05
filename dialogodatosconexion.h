@@ -23,6 +23,7 @@ public:
 public slots:
     void writeSettings();
     void SincronizarCheckButtons();
+    void ActualizarBotonServidor();
     QStringList LeeDatosConexion();
     void ConfiguracionAvanzada();
     bool IsPostgresRunning();

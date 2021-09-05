@@ -37,7 +37,7 @@ DialogoConfiguracion::~DialogoConfiguracion()
 
 void DialogoConfiguracion::ReadSettings()
 {
-    QSettings settings;
+    QSettings settings("DavidSoft", "SDMed2");
     ui->lineEdit_ruta_python->setText(settings.value("rutas/ruta_python").toString());
     m_rutaPython = settings.value("rutas/ruta_python").toString();
 }
@@ -277,7 +277,7 @@ void DialogoConfiguracion::Salir()
 
 void DialogoConfiguracion::WriteSettings()
 {
-    QSettings settings;
+    QSettings settings("DavidSoft", "SDMed2");
     settings.beginGroup("rutas");
     settings.setValue("ruta_python", m_rutaPython);
     //si hay ruta de datos la guardo para poder usarla luego para intentar levantar y parar el servidor
