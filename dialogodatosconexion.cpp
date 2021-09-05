@@ -113,7 +113,8 @@ void DialogoDatosConexion::ActualizarBotonServidor()
 {
     //boton arrancar/parar postgres
     //solo se activa si estamos en localhost y tenemos la ruta donde se guardan los datos de postgres
-    qDebug()<<"Los datos estan en "<<m_directorio_datos_conexion;
+    QString datos = m_directorio_datos_conexion.remove(QRegExp("<[^>]*>"));
+    qDebug()<<"Los datos estan en "<<datos;
     ui->botonArrancarServidor->setEnabled(ui->radioButtonLocalHost->isChecked() && !m_directorio_datos_conexion.isEmpty()
                                           && !m_directorio_datos_conexion.isNull());
     if (IsPostgresRunning())
@@ -153,58 +154,47 @@ bool DialogoDatosConexion::IsPostgresRunning()
         return false;
     #else //windows
     {
-        QProcess proceso1, proceso2;
-        QStringList environment = proceso1.systemEnvironment();
-        QString commandToStart1= "netstat";
-        QStringList argumentos1;
-        argumentos1<<"-ano";
-        proceso1.start(commandToStart1,argumentos1);
-        QString commandToStart2= "findstr";
-        QStringList argumentos2;
-        argumentos2<<"\"5432\"";
-        proceso2.start(commandToStart2,argumentos2);
-        proceso2.setProcessChannelMode(QProcess::ForwardedChannels);
-        bool started = proceso1.waitForStarted();
-        qDebug()<<"bool "<<started;
-        if (!proceso1.waitForFinished(10000)) // 10 Second timeout
+        bool isPostgresListening = false;
+        QProcess proceso_netstat, proceso_tasklist;
+        //QStringList environment = proceso_netstat.systemEnvironment();
+        QString command_netstat= "netstat";
+        QStringList argumentos_netstat({"-ano"});
+        proceso_netstat.start(command_netstat, argumentos_netstat);
+        proceso_netstat.waitForFinished();
+        QString output = proceso_netstat.readAllStandardOutput();
+        QString stsderr = proceso_netstat.readAllStandardError();
+        //qDebug("%s", output.toUtf8().data());
+        qDebug("%s", stsderr.toUtf8().data());
+        QStringList salida = output.split("\r\n");
+        QString PID;
+        Q_FOREACH(QString linea, salida)
         {
-            proceso1.kill();
+            if (linea.contains("127.0.0.1:5432"))
+            {
+                qDebug()<<"Linea "<<linea;
+                PID = linea.section(' ', -1);
+                QString command_tasklist= "tasklist";
+                QStringList argumentos_tasklist;
+                argumentos_tasklist<<"/fi";
+                argumentos_tasklist<<"""pid eq " + PID + """";
+                proceso_tasklist.start(command_tasklist, argumentos_tasklist);
+                proceso_tasklist.waitForFinished();
+                QString output = proceso_tasklist.readAllStandardOutput();
+                QString stsderr = proceso_tasklist.readAllStandardError();
+                qDebug("%s", output.toUtf8().data());
+                qDebug("%s", stsderr.toUtf8().data());
+                QStringList salida = output.split("\r\n");
+                Q_FOREACH(QString s, salida)
+                {
+                    if (s.contains("postg"))
+                    {
+                        qDebug()<<"eureka lo encontré!!! "<<s;
+                        isPostgresListening = true;
+                    }
+                }
+            }
         }
-        int exitCode = proceso1.exitCode();
-        qDebug()<<"exit status"<<exitCode;
-        m_postgres = QString::fromLocal8Bit(proceso1.readAllStandardOutput());
-        QString stdError = QString::fromLocal8Bit(proceso1.readAllStandardError());
-        qDebug()<<"Salida: "<<m_postgres;
-        qDebug()<<"Errores: "<<stdError;
-        if (exitCode == 0)
-        {
-            return true;
-        }
-        return false;
-        /*QProcess process1;
-        QProcess process2;
-        process1.setStandardOutputProcess(&process2);
-        process1.start("netstat", QStringList()<<"-a"<<"-n");
-        process2.start("findstr", QStringList()<<"5432");
-        process2.setProcessChannelMode(QProcess::ForwardedChannels);
-        // Wait for it to start
-        if(!process1.waitForStarted())
-            return 0;
-
-        bool retval = false;
-        QByteArray buffer;
-        while (retval == process2.waitForFinished())
-        {
-            buffer.append(process2.readAll());
-        }*/
-
-        /*if (!retval) {
-            qDebug() << "Process 2 error:" << process2.errorString();
-            return 1;
-        }*/
-        /*qDebug() << "Buffer data" << buffer<<" tam "<<buffer.isEmpty();
-        return !buffer.isEmpty();*/
-        //return true;
+        return isPostgresListening;
     }
 #endif
 }
