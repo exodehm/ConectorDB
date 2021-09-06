@@ -20,6 +20,7 @@ DialogoDatosConexion::DialogoDatosConexion(QSqlDatabase &db, QWidget *parent) :
     QObject::connect(ui->radioButtonLocalHost,SIGNAL(toggled(bool)),this,SLOT(SincronizarCheckButtons()));
     QObject::connect(ui->botonConfiguracionAvanzada, &QPushButton::clicked, [=] () {ConfiguracionAvanzada();});
     QObject::connect(ui->botonComprobar,&QPushButton::clicked, [=] () {Conectar();});
+    QObject::connect(ui->botonArrancarServidor,&QPushButton::clicked,[=](){ControlarServidor();});
     //QObject::connect(ui->botonera->button(QDialogButtonBox::Ok),SIGNAL(clicked()),this,SLOT(LeeDatosConexion()));
 
 }
@@ -226,4 +227,29 @@ bool DialogoDatosConexion::Conectar()
     }
     return m_db.open();
 
+}
+
+void DialogoDatosConexion::ControlarServidor()
+{
+    QString datos = m_directorio_datos_conexion.remove(QRegExp("<[^>]*>"));
+    QString orden_servidor;
+    if (!IsPostgresRunning())
+    {
+        orden_servidor = "start";
+        ui->botonArrancarServidor->setText(tr("Arrancar servidor"));
+    }
+    else
+    {
+        ui->botonArrancarServidor->setText(tr("Parar servidor"));
+        orden_servidor = "stop";
+    }
+    QProcess proceso_controlar_servidor;
+    QString command_controlar_servidor = "pg_ctl";
+    QStringList argumentos_controlar_servidor({"-D",datos,orden_servidor});
+    proceso_controlar_servidor.start(command_controlar_servidor, argumentos_controlar_servidor);
+    proceso_controlar_servidor.waitForFinished();
+    QString output = proceso_controlar_servidor.readAllStandardOutput();
+    QString stsderr = proceso_controlar_servidor.readAllStandardError();
+    qDebug("%s", output.toUtf8().data());
+    qDebug("%s", stsderr.toUtf8().data());
 }

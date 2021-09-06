@@ -28,6 +28,7 @@ public slots:
     void ConfiguracionAvanzada();
     bool IsPostgresRunning();
     bool Conectar();
+    void ControlarServidor();
 
 private:
     Ui::DialogoDatosConexion *ui;
