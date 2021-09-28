@@ -28,7 +28,7 @@ public:
 
 public slots:
     void Configurar();
-    void ConfigurarYConectar();
+    void Conectar();
 
 private:
     Ui::Conector *ui;

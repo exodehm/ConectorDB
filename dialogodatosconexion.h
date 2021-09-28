@@ -18,6 +18,7 @@ public:
     explicit DialogoDatosConexion(QSqlDatabase& db, QWidget *parent = nullptr);
     ~DialogoDatosConexion();
     void readSettings();
+    QString ComponerIP();
 
 
 public slots:
@@ -28,6 +29,7 @@ public slots:
     void ConfiguracionAvanzada();
     bool IsPostgresRunning();
     bool Conectar();
+    bool ArrancarPararServidor();
 
 private:
     Ui::DialogoDatosConexion *ui;

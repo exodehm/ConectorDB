@@ -20,6 +20,7 @@ DialogoDatosConexion::DialogoDatosConexion(QSqlDatabase &db, QWidget *parent) :
     QObject::connect(ui->radioButtonLocalHost,SIGNAL(toggled(bool)),this,SLOT(SincronizarCheckButtons()));
     QObject::connect(ui->botonConfiguracionAvanzada, &QPushButton::clicked, [=] () {ConfiguracionAvanzada();});
     QObject::connect(ui->botonComprobar,&QPushButton::clicked, [=] () {Conectar();});
+    QObject::connect(ui->botonArrancarServidor,&QPushButton::clicked,[=](){ArrancarPararServidor();});
     //QObject::connect(ui->botonera->button(QDialogButtonBox::Ok),SIGNAL(clicked()),this,SLOT(LeeDatosConexion()));
 
 }
@@ -45,6 +46,14 @@ void DialogoDatosConexion::readSettings()
     //settings.endGroup();
 }
 
+QString DialogoDatosConexion::ComponerIP()
+{
+    return ui->lineEditIP1->LeerIP()+"."+
+            ui->lineEditIP2->LeerIP()+"."+
+            ui->lineEditIP3->LeerIP()+"."+
+            ui->lineEditIP4->LeerIP();
+}
+
 QStringList DialogoDatosConexion::DialogoDatosConexion::LeeDatosConexion()
 {
     //primero miro y construyo la cadena de la direccion, si es localhost o una IP
@@ -55,10 +64,7 @@ QStringList DialogoDatosConexion::DialogoDatosConexion::LeeDatosConexion()
     }
     else
     {
-        host = ui->lineEditIP1->LeerIP()+"."+
-                ui->lineEditIP2->LeerIP()+"."+
-                ui->lineEditIP3->LeerIP()+"."+
-                ui->lineEditIP4->LeerIP();
+        host = ComponerIP();
     }
     //ahora ingreso este y el resto de datos en el QStringList
     QStringList datos;
@@ -119,6 +125,10 @@ void DialogoDatosConexion::ActualizarBotonServidor()
     if (IsPostgresRunning())
     {
         ui->botonArrancarServidor->setText("Parar servidor");
+    }
+    else
+    {
+        ui->botonArrancarServidor->setText("Arrancar servidor");
     }
 }
 
@@ -222,7 +232,7 @@ bool DialogoDatosConexion::Conectar()
     }
     else if (ui->radioButtonIP->isChecked())
     {
-
+        m_db.setHostName(ComponerIP());
     }
     if (m_db.open())
     {
@@ -236,4 +246,10 @@ bool DialogoDatosConexion::Conectar()
     }
     return m_db.open();
 
+}
+
+bool DialogoDatosConexion::ArrancarPararServidor()
+{
+    qDebug()<<"Hola holita";
+    return false;
 }

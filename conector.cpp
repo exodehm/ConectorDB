@@ -12,7 +12,7 @@ Conector::Conector(QWidget *parent):QWidget(parent),ui(new Ui::Conector)
     m_db = QSqlDatabase::addDatabase("QPSQL");
     m_db.setConnectOptions("connect_timeout = " + QString::number(m_tiempoMaximoIntentoConexion));
     m_d = nullptr;    
-    ConfigurarYConectar();
+    Conectar();
     QObject::connect(ui->botonConfigurar, SIGNAL(clicked()), this,  SLOT(Configurar()));
 }
 
@@ -48,7 +48,7 @@ void Conector::writeSettings()
     settings.endGroup();
 }
 
-void Conector::ConfigurarYConectar()
+void Conector::Conectar()
 {
     qDebug()<<"Nombre base de datos: "<<m_basededatos;
     qDebug()<<"Nombre usuario: "<<m_nombre;
@@ -70,7 +70,7 @@ void Conector::ConfigurarYConectar()
     {
         ui->labelResultado->setStyleSheet("QLabel {color: red;}");
         ui->labelResultado->setText("<b>Fracaso</b>");
-        m_db.close();
+        //m_db.close();
         Configurar();
     }
 }
@@ -87,15 +87,15 @@ void Conector::Configurar()
         QStringList l = m_d->LeeDatosConexion();
         foreach (QString s, l )
         {
-            qDebug()<<"Leuendo del dialogo: "<<s;
+            qDebug()<<"Leyendo del dialogo: "<<s;
         }
         m_basededatos = l.at(eDatosConexion::BBDD);
         m_nombre = l.at(eDatosConexion::NOMBRE);
         m_puerto = l.at(eDatosConexion::PUERTO);
         m_password = l.at(eDatosConexion::PASSWD);
         m_host = l.at(eDatosConexion::HOST);
-        writeSettings();
-        ConfigurarYConectar();
+        //writeSettings();
+        Conectar();
     }
 }
 
