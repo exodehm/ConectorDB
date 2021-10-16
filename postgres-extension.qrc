@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>postgres-extension/acero.sql</file>
+        <file>postgres-extension/sdmed.control</file>
+        <file>postgres-extension/sdmed--0.1--0.2.sql</file>
+        <file>postgres-extension/sdmed--0.2.sql</file>
+    </qresource>
+</RCC>

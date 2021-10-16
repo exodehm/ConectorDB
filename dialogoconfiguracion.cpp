@@ -114,7 +114,7 @@ void DialogoConfiguracion::InstalarExtension()
                 i++;
             }
 #else//<--Linux ....y mac?
-            /*DialogoSudo* d = new DialogoSudo(this);
+            DialogoSudo* d = new DialogoSudo(this);
             if (d->exec())
             {
                 QString passw = d->PassWSudo();
@@ -126,7 +126,7 @@ void DialogoConfiguracion::InstalarExtension()
                     QString fichero_destino = ruta_extension + listaArchivosCopiar.at(i);
                     CopiarConPermisos(fichero_origen,fichero_destino,passw);
                 }
-            }*/
+            }
 #endif
             //segundo paso, una vez copiados los ficheros al directorio extension,
             //instalar la extension en la base de datos

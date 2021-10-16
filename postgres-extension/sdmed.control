@@ -1,0 +1,5 @@
+#sdmed extension v0.2
+comment = 'Conjunto de funciones, tablas y tipos'
+default_version = '0.2'
+module_pathname = '$libdir/log'
+relocatable = true
