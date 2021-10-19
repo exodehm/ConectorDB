@@ -309,7 +309,7 @@
                        <bool>false</bool>
                       </property>
                       <property name="toolTip">
-                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Intentará buscar la ubicacion donde se encuentra ubicado el directorio donde están las extensiones de PostgreSQL.&lt;/p&gt;&lt;p&gt;Si se desmarca la opción de &amp;quot;&lt;span style=&quot; font-weight:600;&quot;&gt;Búsqueda rápida&lt;/span&gt;&amp;quot; hará una búsqueda exhaustiva de todas las posibles ubicaciones en todo el disco duro, lo que se llevará más tiempo.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       <string/>
                       </property>
                       <property name="text">
                        <string>Instalar</string>

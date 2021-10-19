@@ -37,6 +37,7 @@ private:
     QString m_postgres;
     QSqlDatabase m_db;
     QString m_directorio_datos_conexion;
+    bool m_ispostgres_running;
 };
 
 #endif // DIALOGODATOSCONEXION_H

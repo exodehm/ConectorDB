@@ -9,6 +9,7 @@ Conector::Conector(QWidget *parent):QWidget(parent),ui(new Ui::Conector)
     ui->setupUi(this);
     readSettings();
     m_tiempoMaximoIntentoConexion = 5;
+    m_basededatos = "sdmed";
     m_db = QSqlDatabase::addDatabase("QPSQL");
     m_db.setConnectOptions("connect_timeout = " + QString::number(m_tiempoMaximoIntentoConexion));
     m_d = nullptr;    
@@ -27,7 +28,7 @@ void Conector::readSettings()
 {
     QSettings settings("DavidSoft", "SDMed2");
     settings.beginGroup("DatosConexion");
-    m_basededatos = settings.value("basedatos").toString();
+    //m_basededatos = settings.value("basedatos").toString();
     m_nombre = settings.value("usuario").toString();
     m_puerto = settings.value("puerto").toString();
     m_password = settings.value("passwd").toString();
@@ -50,11 +51,11 @@ void Conector::writeSettings()
 
 void Conector::Conectar()
 {
-    qDebug()<<"Nombre base de datos: "<<m_basededatos;
+    /*qDebug()<<"Nombre base de datos: "<<m_basededatos;
     qDebug()<<"Nombre usuario: "<<m_nombre;
     qDebug()<<"Nombre puerto: "<<m_puerto;
     qDebug()<<"Nombre password: "<<m_password;
-    qDebug()<<"Nombre del hostname: "<<m_host;
+    qDebug()<<"Nombre del hostname: "<<m_host;*/
     m_db.setDatabaseName(m_basededatos);
     m_db.setUserName(m_nombre);
     m_db.setPort(m_puerto.toInt());

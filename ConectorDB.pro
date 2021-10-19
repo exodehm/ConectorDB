@@ -20,6 +20,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     conector.cpp \
     dialogoconfiguracion.cpp \
+    dialogocontrasenna.cpp \
     dialogocredencialesconexionadmin.cpp \
     dialogodatosconexion.cpp \
     dialogosudo.cpp \
@@ -29,6 +30,7 @@ SOURCES += \
 HEADERS += \
     conector.h \
     dialogoconfiguracion.h \
+    dialogocontrasenna.h \
     dialogocredencialesconexionadmin.h \
     dialogodatosconexion.h \
     dialogosudo.h \
@@ -37,6 +39,7 @@ HEADERS += \
 FORMS += \
     conector.ui \
     dialogoconfiguracion.ui \
+    dialogocontrasenna.ui \
     dialogocredencialesconexionadmin.ui \
     dialogosudo.ui \
     dialogodatosconexion.ui \

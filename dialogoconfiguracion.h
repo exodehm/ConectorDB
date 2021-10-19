@@ -20,24 +20,27 @@ public:
     ~DialogoConfiguracion();
     void ReadSettings();
     void WriteSettings();
-    bool HayPython();
-    //bool IsPostgresRunning();
+    bool HayPython();    
     void ComprobacionesPython();
     void ComprobarDatosAdminRole(QSqlDatabase db);
     void ComprobarRoleSdmed(QSqlQuery consulta);
-    void ComprobarExistenciaBBDDSdmed(QSqlQuery consulta);
+    bool ComprobarExistenciaBBDDSdmed(QSqlQuery consulta);
     void ComprobarExtensionSuministrada();
     void ComprobarExtensionInstalada(QSqlQuery consulta);
     void CopiarConPermisos(const QString &fichero_origen, const QString &fichero_destino, QString passw = "");
     void ActivarLetreros(bool esadmin);
+    bool ComprobarBotonInstalarExtension();
 
 public slots:
     void ComprobacionesPostgres();
     void DefinirRutaScripts();
     void ActivarBotonInstalarExtension();
-    void InstalarExtension();
+    bool InstalarExtension();
     void InstalarScriptsPython();
     void DatosAdmin();
+    bool CrearRoleContrasenna();
+    bool CrearBaseDatosSdmed();
+    void SetAdmin(bool esadmin);
     void Salir();
 
 private:
@@ -52,6 +55,9 @@ private:
 
     QSqlDatabase m_dbAdmin;
     bool m_esDBAdmin;
+    bool m_hayRole;
+    bool m_hayExtension;
+    bool m_hayBBDDSdmed;
     DialogoCredencialesConexionAdmin* m_dialogoConfiguracionAdmin;
 };
 

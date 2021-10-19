@@ -26,10 +26,13 @@ public:
     void WriteSettings();
     void ReadSettings();
     sDatosConexion LeeDatosConexion();
+    void DefinirBBDD(QString nombreBBDD);
 
 public slots:
     bool ComprobarAdminRole();
     void ResetearBotonComprobar(const QString& texto);
+signals:
+    void EsAdmin(bool esadmin);
 
 private:
     Ui::DialogoCredencialesConexionAdmin *ui;

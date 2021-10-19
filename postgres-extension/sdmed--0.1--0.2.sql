@@ -1330,7 +1330,7 @@ IF existe IS FALSE THEN
     tamanno character varying(13)
 );
 
-CREATE SEQUENCE "tCorrugados_id_seq"
+CREATE SEQUENCE sdmed."tCorrugados_id_seq"
     AS integer
     START WITH 1
     INCREMENT BY 1

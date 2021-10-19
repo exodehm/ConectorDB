@@ -17,10 +17,12 @@ DialogoDatosConexion::DialogoDatosConexion(QSqlDatabase &db, QWidget *parent) :
     m_dialogoconfig =  nullptr;
     readSettings();
     SincronizarCheckButtons();
+    m_ispostgres_running = IsPostgresRunning();
+    qDebug()<<"It´s postgres running!"<<m_ispostgres_running;
     QObject::connect(ui->radioButtonLocalHost,SIGNAL(toggled(bool)),this,SLOT(SincronizarCheckButtons()));
     QObject::connect(ui->botonConfiguracionAvanzada, &QPushButton::clicked, [=] () {ConfiguracionAvanzada();});
-    QObject::connect(ui->botonComprobar,&QPushButton::clicked, [=] () {Conectar();});
-    QObject::connect(ui->botonArrancarServidor,&QPushButton::clicked,[=](){ArrancarPararServidor();});
+    QObject::connect(ui->botonComprobar, &QPushButton::clicked, [=] () {Conectar();});
+    QObject::connect(ui->botonArrancarServidor, &QPushButton::clicked,[=](){ArrancarPararServidor();});
     //QObject::connect(ui->botonera->button(QDialogButtonBox::Ok),SIGNAL(clicked()),this,SLOT(LeeDatosConexion()));
 
 }
@@ -110,7 +112,7 @@ void DialogoDatosConexion::SincronizarCheckButtons()
     //boton para configurar
     //este solo se activara si estamos en modo local, para poder instalar
     //extensiones y demas.
-    ui->botonConfiguracionAvanzada->setEnabled(ui->radioButtonLocalHost->isChecked() && IsPostgresRunning());
+    ui->botonConfiguracionAvanzada->setEnabled(ui->radioButtonLocalHost->isChecked() && /*IsPostgresRunning()*/m_ispostgres_running);
     //ver si hay que modificar el boton de arrancar servidor
     ActualizarBotonServidor();
 }
@@ -122,13 +124,13 @@ void DialogoDatosConexion::ActualizarBotonServidor()
     qDebug()<<"Los datos estan en "<<m_directorio_datos_conexion;
     ui->botonArrancarServidor->setEnabled(ui->radioButtonLocalHost->isChecked() && !m_directorio_datos_conexion.isEmpty()
                                           && !m_directorio_datos_conexion.isNull());
-    if (IsPostgresRunning())
+    if (m_ispostgres_running/*IsPostgresRunning()*/)
     {
-        ui->botonArrancarServidor->setText("Parar servidor");
+        ui->botonArrancarServidor->setText(tr("Parar servidor"));
     }
     else
     {
-        ui->botonArrancarServidor->setText("Arrancar servidor");
+        ui->botonArrancarServidor->setText(tr("Arrancar servidor"));
     }
 }
 
@@ -171,7 +173,8 @@ bool DialogoDatosConexion::IsPostgresRunning()
         proceso1.start(commandToStart1,argumentos1);
         QString commandToStart2= "findstr";
         QStringList argumentos2;
-        argumentos2<<"\"5432\"";
+        //argumentos2<<"\"5432\"";
+        argumentos2<<ui->lineEditPuerto->text();
         proceso2.start(commandToStart2,argumentos2);
         proceso2.setProcessChannelMode(QProcess::ForwardedChannels);
         bool started = proceso1.waitForStarted();
@@ -188,33 +191,10 @@ bool DialogoDatosConexion::IsPostgresRunning()
         qDebug()<<"Errores: "<<stdError;
         if (exitCode == 0)
         {
+            qDebug()<<"It´s postgres running!"<<m_ispostgres_running;
             return true;
         }
         return false;
-        /*QProcess process1;
-        QProcess process2;
-        process1.setStandardOutputProcess(&process2);
-        process1.start("netstat", QStringList()<<"-a"<<"-n");
-        process2.start("findstr", QStringList()<<"5432");
-        process2.setProcessChannelMode(QProcess::ForwardedChannels);
-        // Wait for it to start
-        if(!process1.waitForStarted())
-            return 0;
-
-        bool retval = false;
-        QByteArray buffer;
-        while (retval == process2.waitForFinished())
-        {
-            buffer.append(process2.readAll());
-        }*/
-
-        /*if (!retval) {
-            qDebug() << "Process 2 error:" << process2.errorString();
-            return 1;
-        }*/
-        /*qDebug() << "Buffer data" << buffer<<" tam "<<buffer.isEmpty();
-        return !buffer.isEmpty();*/
-        //return true;
     }
 #endif
 }
@@ -237,19 +217,26 @@ bool DialogoDatosConexion::Conectar()
     if (m_db.open())
     {
         ui->labelConectado->setStyleSheet("QLabel { color: green;}");
-        ui->labelConectado->setText("<b>Exito</b>");
+        ui->labelConectado->setText(tr("<b>Conectado con éxito</b>"));
     }
     else
     {
         ui->labelConectado->setStyleSheet("QLabel {color: red;}");
-        ui->labelConectado->setText("<b>Fracaso</b>");
+        ui->labelConectado->setText(tr("<b>Error en la conexión</b>"));
     }
     return m_db.open();
-
 }
 
 bool DialogoDatosConexion::ArrancarPararServidor()
 {
-    qDebug()<<"Hola holita";
-    return false;
+    m_ispostgres_running=!m_ispostgres_running;
+    if (m_ispostgres_running)
+    {
+        ui->botonArrancarServidor->setText(tr("Parar\nservidor"));
+    }
+    else
+    {
+        ui->botonArrancarServidor->setText(tr("Arrancar\nservidor"));
+    }
+    return m_ispostgres_running;
 }
