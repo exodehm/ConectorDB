@@ -16,7 +16,8 @@ class DialogoConfiguracion : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogoConfiguracion(QWidget *parent = nullptr);
+    //explicit DialogoConfiguracion(QWidget *parent = nullptr);
+    explicit DialogoConfiguracion(QSqlDatabase &db, QWidget *parent = nullptr);
     ~DialogoConfiguracion();
     void ReadSettings();
     void WriteSettings();
@@ -53,7 +54,8 @@ private:
     bool m_instalarExtension;
 
 
-    QSqlDatabase m_dbAdmin;
+    //QSqlDatabase m_dbAdmin;
+    QSqlDatabase *m_dbAdmin;
     bool m_esDBAdmin;
     bool m_hayRole;
     bool m_hayExtension;

@@ -7,6 +7,7 @@
 #include <QSettings>
 #include <QPushButton>
 #include <QProcess>
+#include <QSqlError>
 
 DialogoDatosConexion::DialogoDatosConexion(QSqlDatabase &db, QWidget *parent) :
     m_db(db),
@@ -85,7 +86,7 @@ void DialogoDatosConexion::ConfiguracionAvanzada()
 {
     if (m_dialogoconfig==nullptr)
     {
-        m_dialogoconfig = new DialogoConfiguracion;
+        m_dialogoconfig = new DialogoConfiguracion(m_db);
     }
     m_dialogoconfig->show();
 }
@@ -224,6 +225,7 @@ bool DialogoDatosConexion::Conectar()
         ui->labelConectado->setStyleSheet("QLabel {color: red;}");
         ui->labelConectado->setText(tr("<b>Error en la conexión</b>"));
     }
+    qDebug()<<m_db.lastError();
     return m_db.open();
 }
 

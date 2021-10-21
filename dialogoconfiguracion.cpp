@@ -18,14 +18,15 @@
 
 //#include "pyrun.h"
 
-DialogoConfiguracion::DialogoConfiguracion(QWidget *parent) : QDialog(parent), ui(new Ui::DialogoConfiguracion)
+DialogoConfiguracion::DialogoConfiguracion(QSqlDatabase &db, QWidget *parent) : QDialog(parent), ui(new Ui::DialogoConfiguracion)
 {
     ui->setupUi(this);
     m_dialogoConfiguracionAdmin = nullptr;
-    m_dbAdmin= QSqlDatabase::addDatabase("QPSQL");
+    //m_dbAdmin= QSqlDatabase::addDatabase("QPSQL");
+    m_dbAdmin = &db;
     ReadSettings();
     ComprobacionesPython();
-    ComprobarDatosAdminRole(m_dbAdmin);
+    ComprobarDatosAdminRole(*m_dbAdmin);
     QObject::connect(ui->botonDatosAdmin,SIGNAL(clicked(bool)),this,SLOT(DatosAdmin()));
     QObject::connect(ui->boton_ruta_python,SIGNAL(clicked(bool)),this,SLOT(DefinirRutaScripts()));
     QObject::connect(ui->boton_salir,SIGNAL(clicked(bool)),this,SLOT(Salir()));
@@ -73,7 +74,7 @@ bool DialogoConfiguracion::InstalarExtension()
     //Para instalar la extension hay que estar conectado a la BBDD "sdmed", por lo que el primer paso sera comprobar
     //si se esta conectado, y si no, abrir un dialogo para recordarlo y salir de la funcion
     QString cadenaRoleActual = "SELECT current_database()";
-    QSqlQuery consulta (m_dbAdmin);
+    QSqlQuery consulta (*m_dbAdmin);
     consulta.exec(cadenaRoleActual);
     QString BBDD;
     if (consulta.size()>0)
@@ -248,12 +249,12 @@ void DialogoConfiguracion::DatosAdmin()
 {
     if (!m_dialogoConfiguracionAdmin)
     {
-        m_dialogoConfiguracionAdmin = new DialogoCredencialesConexionAdmin(m_dbAdmin, this);
+        m_dialogoConfiguracionAdmin = new DialogoCredencialesConexionAdmin(*m_dbAdmin, this);
         QObject::connect(m_dialogoConfiguracionAdmin,SIGNAL(EsAdmin(bool)),this,SLOT(SetAdmin(bool)));
         QObject::connect(m_dialogoConfiguracionAdmin,SIGNAL(accepted()),this,SLOT(ComprobacionesPostgres()));
     }
     m_dialogoConfiguracionAdmin->show();
-    ComprobarDatosAdminRole(m_dbAdmin);
+    ComprobarDatosAdminRole(*m_dbAdmin);
 }
 
 void DialogoConfiguracion::CopiarConPermisos(const QString &fichero_origen, const QString &fichero_destino, QString passw)
@@ -376,9 +377,9 @@ void DialogoConfiguracion::ComprobacionesPostgres()
 {
     //if (IsPostgresRunning())    
     {
-        if (m_dbAdmin.open())
+        if (m_dbAdmin->open())
         {
-            QSqlQuery consulta(m_dbAdmin);
+            QSqlQuery consulta(*m_dbAdmin);
             //directorio extension
             QString consultaSharedir = "SELECT setting from pg_config WHERE name = \'SHAREDIR\'";
             consulta.exec(consultaSharedir);
@@ -588,7 +589,7 @@ bool DialogoConfiguracion::CrearRoleContrasenna()
     //esta funcion servira para crear el role si no existe y asignar una contrasenna, o solo
     //crear la contrasenna si ya existe el role
     //ademas, si no existia el role sdmed, despues de crearlo le da la propiedad de la base de datos 'sdmd'
-    QSqlQuery consulta(m_dbAdmin);
+    QSqlQuery consulta(*m_dbAdmin);
     QString cadenaRole;
     DialogoContrasenna* d = new DialogoContrasenna(this);
     if (d->exec())
@@ -618,7 +619,7 @@ bool DialogoConfiguracion::CrearBaseDatosSdmed()
     //en caso afirmativo, le asigna la propiedad de la bbdd.
     QString cadenaCrearBBDD = "CREATE DATABASE sdmed WITH TEMPLATE = template0 ENCODING 'UTF8'";
     qDebug()<<cadenaCrearBBDD;
-    QSqlQuery consulta (m_dbAdmin);
+    QSqlQuery consulta (*m_dbAdmin);
     consulta.exec(cadenaCrearBBDD);
     if (!ComprobarExistenciaBBDDSdmed(consulta))//si no se ha creado salimos de la funcion
     {
